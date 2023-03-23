@@ -1,4 +1,5 @@
 import os, filecmp ,sys
+import subprocess
 
 codes = {200:'success',404:'file not found',400:'error',408:'timeout'}
 
@@ -27,23 +28,27 @@ def run(file,input,timeout,lang):
         cmd += './a.out'
     elif lang=='python3':
         cmd += 'python3 '+ file
-
-    r = os.system('timeout '+timeout+' '+cmd+' < '+ input + ' > '+testout)
-
-    if r==0:
-        return 200
-    elif r==31744:
+    try:
+        # Use subprocess to run the command
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        # Use communicate() to send input and get output
+        output, err = p.communicate(input.encode(), timeout=int(timeout))
+        # Run the subprocess in the background parellelly
+        p_status = p.wait()
+        print(output)
+    except subprocess.TimeoutExpired:
+        # Kill the process if timeout
+        p.kill()
         return 408
+        
+    
+    #Send the appropriate status code
+    if p.returncode == 0:
+        return 200
+    elif p.returncode == 127:
+        return 404
     else:
         return 400
-
-def match(output):
-    if os.path.isfile('out.txt') and os.path.isfile(output):
-        b = filecmp.cmp('out.txt',output)
-        os.remove('out.txt')
-        return b
-    else:
-        return 404
 
 params=sys.argv
 file = params[1].split('/')[3]
