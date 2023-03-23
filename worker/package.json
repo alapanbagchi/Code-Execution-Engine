@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "redis": "^4.6.5",
+    "rimraf": "^4.4.0"
+  }
+}

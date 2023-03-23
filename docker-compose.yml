@@ -1,0 +1,23 @@
+version: "3.7"
+services:
+  rabbitmq:
+    image: "rabbitmq"
+    restart: always
+  redis_db:
+    image: "redis"
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379"
+    restart: always
+  server:
+    build: ./server
+    restart: always
+    ports:
+      - "8000:8000"
+  worker:
+    build: ./worker
+    restart: always
+    pids_limit: 1000
+    cpus: 1
+    mem_limit: 1G
